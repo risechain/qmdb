@@ -7,7 +7,7 @@ Coming soon!
 
 ## Any questions?
 
-[Please raise a GitHub issue](https://github.com/LayerZero-Labs/qmdb/issues/new).
+[Please raise a GitHub issue](https://github.com/LayerZero-Labs/qmdb/issues/new). (This will be disabled before the paper goes live.)
 
 ## Whitepaper reference
 
