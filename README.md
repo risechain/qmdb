@@ -51,6 +51,21 @@ git clone https://github.com/LayerZero-Labs/qmdb
 cd qmdb
 ```
 
+The following pre-requisites are required to build QMDB:
+
+- g++
+- linux-libc-dev
+- libclang-dev
+- unzip
+- libjemalloc-dev
+- make
+
+We provide a script to install the pre-requisites on Ubuntu:
+
+```bash
+./install-prereqs-ubuntu.sh
+```
+
 Build the project using Cargo:
 
 ```bash
