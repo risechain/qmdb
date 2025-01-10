@@ -12,4 +12,5 @@ Coming soon!
 ## Whitepaper reference
 
 **Quick Merkle Database**<br>
-Isaac Zhang, Ryan Zarick, Daniel Wong, Thomas Kim, Bryan Pellegrino, Mignon Li, Kelvin Wong
+Isaac Zhang, Ryan Zarick, Daniel Wong, Thomas Kim, Bryan Pellegrino, Mignon Li, Kelvin Wong<br>
+https://arxiv.org/abs/2501.05262
