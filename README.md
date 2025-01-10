@@ -2,7 +2,6 @@
 
 ![Build Status](https://github.com/LayerZero-Labs/qmdb/actions/workflows/build.yml/badge.svg)
 ![Tests](https://github.com/LayerZero-Labs/qmdb/actions/workflows/tests.yml/badge.svg)
-![License](https://img.shields.io/github/license/LayerZero-Labs/qmdb)
 
 ## Overview
 
