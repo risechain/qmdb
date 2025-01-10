@@ -40,7 +40,7 @@ Read the QMDB paper here: <https://arxiv.org/abs/2412.15022>
 ## Key data structures
 
 - **Entry** ([`qmdb/src/entryfile/entry.rs`](qmdb/src/entryfile/entry.rs)): The primitive data structure in QMDB, with each Entry corresponding to a single key-value pair.
-- **Twigs** ([`qmdb/src/merkletree/twigs.rs`](qmdb/src/merkletree/twigs.rs)): A compact and efficient representation of the Merkle tree, minimizing DRAM usage by keeping most data on SSD.
+- **Twigs** ([`qmdb/src/merkletree/twig.rs`](qmdb/src/merkletree/twig.rs)): A compact and efficient representation of the Merkle tree, minimizing DRAM usage by keeping most data on SSD.
 
 ## Installation
 
