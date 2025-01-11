@@ -11,6 +11,8 @@ QMDB can perform in-memory Merklelization with minimal DRAM usage, and offers ef
 
 Read the QMDB paper here: <https://arxiv.org/abs/2501.05262>
 
+*QMDB is ongoing research. Designed for high performance and practical use, some features are still evolving. We invite feedback and contributions from the community.*
+
 ## Use Cases
 
 - **Blockchain State Storage**: Ideal for maintaining verifiable state in decentralized systems.
@@ -138,7 +140,7 @@ Isaac Zhang, Ryan Zarick, Daniel Wong, Thomas Kim, Bryan Pellegrino, Mignon Li, 
 }
 ```
 
-QMDB is a product of [LayerZero Labs](https://layerzero.network).
+QMDB is a product of [LayerZero Labs](https://layerzero.network) Research.
 
 <!-- markdownlint-disable MD033 -->
 <p align="center">

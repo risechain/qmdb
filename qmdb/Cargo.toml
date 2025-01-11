@@ -1,7 +1,12 @@
 [package]
 name = "qmdb"
-version = "0.1.0"
-edition = "2021"
+version = "0.2.0"
+edition = "2025"
+description = "A high-performance verifiable key-value store, designed to optimize blockchain state storage."
+repository = "https://github.com/LayerZero-Labs/qmdb"
+authors = ["LayerZero Labs Research"]
+license = "MIT OR Apache-2.0"
+
 
 [[example]]
 name = "v1_fuzz"
