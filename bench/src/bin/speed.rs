@@ -8,6 +8,7 @@ use bench::{
     speed::{db_backend, test_gen::TestGenV2},
 };
 
+use qmdb::def::IN_BLOCK_IDX_BITS;
 use qmdb::def::OP_CREATE;
 use qmdb::def::OP_DELETE;
 use qmdb::def::OP_READ;
@@ -55,6 +56,12 @@ fn main() {
     // Each changeset has ~10 operations (9 writes + 1 delete typically)
     let ops_per_changeset = 10; //test_gen.num_ops_in_cset() as usize;
     let tasks_per_block = args.ops_per_block / (args.changesets_per_task * ops_per_changeset);
+
+    // task_ids encoded the local task_id index in the first IN_BLOCK_IDX_BITS bits of a i64 and
+    // the height in the remaining bits. This just makes sure we don't overflow during testing.
+    if tasks_per_block >= (1 << IN_BLOCK_IDX_BITS) {
+        panic!("tasks_per_block {} is too large", tasks_per_block);
+    }
     // Check that it divides evenly
     if args.entry_count % args.ops_per_block != 0 {
         panic!(
