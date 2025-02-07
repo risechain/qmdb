@@ -966,7 +966,7 @@ mod tests {
                     task_id,
                 )),
             );
-            assert_eq!(r.0, true);
+            assert!(r.0);
             if h <= 2 {
                 assert!(r.1.is_none());
             } else {

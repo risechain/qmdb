@@ -830,12 +830,12 @@ impl Tree {
         path.serial_num = sn;
 
         if twig_id > self.youngest_twig_id {
-            return Err(format!("twig_id > self.youngest_twig_id"));
+            return Err("twig_id > self.youngest_twig_id".to_string());
         }
 
         (path.upper_path, path.root) = self.get_upper_path_and_root(twig_id);
         if path.upper_path.is_empty() {
-            return Err(format!("Cannot find upper path"));
+            return Err("Cannot find upper path".to_string());
         }
 
         if twig_id == self.youngest_twig_id {
@@ -843,7 +843,7 @@ impl Tree {
         } else {
             let twig_file = &self.twig_file_wr.twig_file;
             if twig_file.is_empty() {
-                return Err(format!("twig_file is empty"));
+                return Err("twig_file is empty".to_string());
             }
             path.left_of_twig = proof::get_left_path_on_disk(twig_file, twig_id, sn);
         }
