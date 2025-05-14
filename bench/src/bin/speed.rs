@@ -399,13 +399,13 @@ fn run_hover_tasks(
         results,
     );
 
-    //measure_read_latency(
-    //    table_id,
-    //    max_num,
-    //    randsrc,
-    //    results,
-    //    num_read_latency_samples,
-    //);
+    measure_read_latency(
+       table_id,
+       max_num,
+       randsrc,
+       results,
+       num_read_latency_samples,
+    );
 }
 
 fn hover_execute_op(

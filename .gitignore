@@ -38,5 +38,6 @@ results.json
 qmdb_benchmark.json
 qmdb_results.txt
 qmdb_results.json
+qmdb/test_merger/
 
 .envrc
