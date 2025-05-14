@@ -1,4 +1,4 @@
-use std::{fs, path::Path};
+use std::{fs, path::Path, sync::OnceLock};
 
 use log::debug;
 use parking_lot::RwLock;
@@ -12,7 +12,7 @@ use rayon;
 use rayon::iter::*;
 use reth_libmdbx::{Environment, Geometry, ObjectLength, WriteFlags};
 
-static mut MDBX_ENV: Option<Environment> = None;
+static MDBX_ENV: OnceLock<Environment> = OnceLock::new();
 
 pub fn init(mdbx_dir: &str) {
     // init MDBX
@@ -28,37 +28,23 @@ pub fn init(mdbx_dir: &str) {
         .open(Path::new(mdbx_dir))
         .unwrap();
     debug!("MDBX: env.map_size={}", mdbx_env.info().unwrap().map_size());
-    unsafe {
-        MDBX_ENV = Some(mdbx_env);
-    }
+    MDBX_ENV.set(mdbx_env).unwrap();
 }
 
 pub fn create_kv(_: i64, task_list: Vec<RwLock<Option<SimpleTask>>>) {
-    let mut mdbx_env = unsafe { MDBX_ENV.take().unwrap() };
-    mdbx_create_kv(&mut mdbx_env, &task_list);
-    unsafe {
-        MDBX_ENV = Some(mdbx_env);
-    }
+    mdbx_create_kv(MDBX_ENV.get().unwrap(), &task_list);
 }
 
 pub fn update_kv(_: i64, task_list: Vec<RwLock<Option<SimpleTask>>>) {
-    let mut mdbx_env = unsafe { MDBX_ENV.take().unwrap() };
-    mdbx_update_kv(&mut mdbx_env, &task_list);
-    unsafe {
-        MDBX_ENV = Some(mdbx_env);
-    }
+    mdbx_update_kv(MDBX_ENV.get().unwrap(), &task_list);
 }
 
 pub fn delete_kv(_: i64, task_list: Vec<RwLock<Option<SimpleTask>>>) {
-    let mut mdbx_env = unsafe { MDBX_ENV.take().unwrap() };
-    mdbx_update_kv(&mut mdbx_env, &task_list);
-    unsafe {
-        MDBX_ENV = Some(mdbx_env);
-    }
+    mdbx_update_kv(MDBX_ENV.get().unwrap(), &task_list);
 }
 
 pub fn read_kv(key_list: &Vec<[u8; 52]>) {
-    let mdbx_env = unsafe { MDBX_ENV.take().unwrap() };
+    let mdbx_env = MDBX_ENV.get().unwrap();
     let txn = &mdbx_env.begin_ro_txn().unwrap();
     let db = &txn.open_db(None).unwrap();
     rayon::scope(|s| {
@@ -69,13 +55,10 @@ pub fn read_kv(key_list: &Vec<[u8; 52]>) {
             });
         }
     });
-    unsafe {
-        MDBX_ENV = Some(mdbx_env);
-    }
 }
 
 // ===========
-fn mdbx_create_kv(env: &mut Environment, task_list: &Vec<RwLock<Option<SimpleTask>>>) {
+fn mdbx_create_kv(env: &Environment, task_list: &Vec<RwLock<Option<SimpleTask>>>) {
     let txn = env.begin_rw_txn().unwrap();
     let db = txn.open_db(None).unwrap();
     for item in task_list.iter() {
@@ -93,7 +76,7 @@ fn mdbx_create_kv(env: &mut Environment, task_list: &Vec<RwLock<Option<SimpleTas
     txn.commit().unwrap();
 }
 
-fn mdbx_update_kv(env: &mut Environment, task_list: &Vec<RwLock<Option<SimpleTask>>>) {
+fn mdbx_update_kv(env: &Environment, task_list: &Vec<RwLock<Option<SimpleTask>>>) {
     std::thread::scope(|s| {
         let handler = s.spawn(|| {
             let txn = env.begin_rw_txn().unwrap();
