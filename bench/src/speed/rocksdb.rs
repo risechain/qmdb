@@ -1,4 +1,4 @@
-use std::{fs, path::Path};
+use std::{fs, path::Path, sync::OnceLock};
 
 use parking_lot::RwLock;
 use qmdb::{
@@ -10,6 +10,7 @@ use qmdb::{
 use rayon;
 use rocksdb::{Options, ReadOptions, WriteBatch, WriteBatchWithTransaction, WriteOptions, DB};
 
+#[derive(Debug)]
 struct RocksDB {
     db: DB,
 }
@@ -81,7 +82,7 @@ impl RocksDB {
     //     self.db.write(batch.batch).unwrap();
     // }
 
-    fn batch_write_sync(&mut self, batch: RocksBatch) {
+    fn batch_write_sync(&self, batch: RocksBatch) {
         let mut write_options = WriteOptions::default();
         write_options.set_sync(true);
         self.db.write_opt(batch.batch, &write_options).unwrap();
@@ -110,61 +111,43 @@ impl RocksBatch {
     }
 }
 
-static mut RKS_DB: Option<RocksDB> = None;
+static RKS_DB: OnceLock<RocksDB> = OnceLock::new();
 
 pub fn init(rocksdb_dir: &str) {
     if Path::new(rocksdb_dir).exists() {
         fs::remove_dir_all(rocksdb_dir).unwrap();
     }
     let rks_db = RocksDB::new("ROCKS", rocksdb_dir);
-    unsafe {
-        RKS_DB = Some(rks_db);
-    }
+    RKS_DB.set(rks_db).unwrap();
 }
 
 pub fn create_kv(_: i64, task_list: Vec<RwLock<Option<SimpleTask>>>) {
-    let mut rks_db = unsafe { RKS_DB.take().unwrap() };
-    rocksdb_create_kv(&mut rks_db, &task_list);
-    unsafe {
-        RKS_DB = Some(rks_db);
-    }
+    rocksdb_create_kv(RKS_DB.get().unwrap(), &task_list);
 }
 
 pub fn update_kv(_: i64, task_list: Vec<RwLock<Option<SimpleTask>>>) {
-    let mut rks_db = unsafe { RKS_DB.take().unwrap() };
-    rocksdb_update_kv(&mut rks_db, &task_list);
-    unsafe {
-        RKS_DB = Some(rks_db);
-    }
+    rocksdb_update_kv(RKS_DB.get().unwrap(), &task_list);
 }
 
 pub fn delete_kv(_: i64, task_list: Vec<RwLock<Option<SimpleTask>>>) {
-    let mut rks_db = unsafe { RKS_DB.take().unwrap() };
-    rocksdb_update_kv(&mut rks_db, &task_list);
-    unsafe {
-        RKS_DB = Some(rks_db);
-    }
+    rocksdb_update_kv(RKS_DB.get().unwrap(), &task_list);
 }
 
 pub fn read_kv(key_list: &Vec<[u8; 52]>) {
-    let rks_db = unsafe { RKS_DB.take().unwrap() };
-    let _rks_db = &rks_db;
+    let rks_db = RKS_DB.get().unwrap();
     rayon::scope(|s| {
         for k in key_list.iter() {
             let _ = hasher::hash(&k[..]);
             s.spawn(move |_| {
-                _rks_db.get(k).unwrap();
+                rks_db.get(k).unwrap();
             });
         }
     });
-    unsafe {
-        RKS_DB = Some(rks_db);
-    }
 }
 
 // ===========
 
-fn rocksdb_create_kv(rks_db: &mut RocksDB, task_list: &Vec<RwLock<Option<SimpleTask>>>) {
+fn rocksdb_create_kv(rks_db: &RocksDB, task_list: &Vec<RwLock<Option<SimpleTask>>>) {
     let mut batch = RocksBatch::new();
     for item in task_list.iter() {
         let task_opt = item.read();
@@ -181,7 +164,7 @@ fn rocksdb_create_kv(rks_db: &mut RocksDB, task_list: &Vec<RwLock<Option<SimpleT
     rks_db.batch_write_sync(batch);
 }
 
-fn rocksdb_update_kv(rks_db: &mut RocksDB, task_list: &Vec<RwLock<Option<SimpleTask>>>) {
+fn rocksdb_update_kv(rks_db: &RocksDB, task_list: &Vec<RwLock<Option<SimpleTask>>>) {
     const N: usize = 10000;
     let mut keys = Vec::with_capacity(N);
     let mut batch_out = RocksBatch::new();
